@@ -1,4 +1,10 @@
 Learning Management System (LMS)
+
+
+
+
+
+
 A web-based Learning Management System (LMS) built using Java Spring Boot for managing online courses, assessments, and performance tracking. The system supports multiple user roles (Admin, Instructor, Student) with features like course creation, user management, quizzes, assignments, and more.
 
 Features
