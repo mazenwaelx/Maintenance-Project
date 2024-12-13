@@ -15,6 +15,7 @@ public class StudentService {
         this.studentRepository = studentRepository;
         this.UsersRepository = UsersRepository;
     }
+
     public Optional<Student> getOne(Integer id) {
         return studentRepository.findById(id);
     }

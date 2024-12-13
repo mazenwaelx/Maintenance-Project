@@ -19,11 +19,12 @@ public class Users {
     @NotEmpty
     private String password;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private Date registrationDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userTypeId", referencedColumnName = "userTypeId")
+    @JoinColumn(name = "user_type_id", referencedColumnName = "userTypeId" , nullable = false)
     private UsersType userTypeId;
 
 
