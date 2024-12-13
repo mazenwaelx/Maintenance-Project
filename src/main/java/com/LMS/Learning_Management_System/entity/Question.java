@@ -9,6 +9,7 @@ public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "question_id")
     private int questionId;
 
     @ManyToOne(cascade = CascadeType.ALL)

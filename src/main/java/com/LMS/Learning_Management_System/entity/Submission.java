@@ -11,6 +11,8 @@ public class Submission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "submission_id")
+
     private int submissionId;
 
     @ManyToOne(cascade = CascadeType.ALL)

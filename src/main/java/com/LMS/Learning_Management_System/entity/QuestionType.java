@@ -8,6 +8,7 @@ public class QuestionType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "type_id")
     private int typeId;
 
     @Enumerated(EnumType.STRING)

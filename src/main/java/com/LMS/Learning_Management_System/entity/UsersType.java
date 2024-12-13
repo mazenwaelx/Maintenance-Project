@@ -9,6 +9,7 @@ import java.util.List;
 public class UsersType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_type_id")
     private int userTypeId;
 
     @Column(nullable = false, unique = true)
@@ -17,7 +18,7 @@ public class UsersType {
 //    orphanRemoval = true is an option used in the @OneToMany or @OneToOne JPA annotations
 //    that allows for automatic removal of child entities (orphaned entities)
 //    when they are no longer referenced by their parent entity.
-    @OneToMany(targetEntity = Users.class, mappedBy = "userType", cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToMany(mappedBy = "userTypeId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Users> users;
 
     public UsersType() {

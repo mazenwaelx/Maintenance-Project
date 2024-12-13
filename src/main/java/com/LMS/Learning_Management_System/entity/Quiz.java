@@ -11,6 +11,8 @@ public class Quiz {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "quiz_id")
+
     private int quizId;
 
     @Column(name = "title", nullable = false)

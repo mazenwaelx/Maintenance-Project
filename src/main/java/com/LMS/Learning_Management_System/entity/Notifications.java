@@ -10,11 +10,12 @@ import java.util.Date;
 public class Notifications {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Notification_id")
     private int notificationsId;
 
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private Users userId;
 
     private String message;

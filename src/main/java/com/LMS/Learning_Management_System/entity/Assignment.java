@@ -11,6 +11,7 @@ import java.util.Date;
 public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "assignment_id")
     private int assignmentId;
     private String title;
     private String description;

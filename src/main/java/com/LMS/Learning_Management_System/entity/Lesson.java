@@ -10,6 +10,7 @@ import java.util.Date;
 public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "lesson_id")
     private int lessonId;
 
     @ManyToOne(cascade = CascadeType.ALL)

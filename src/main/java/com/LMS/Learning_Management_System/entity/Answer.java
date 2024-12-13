@@ -8,6 +8,7 @@ public class Answer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "answer_id")
     private int answerId;
 
     @ManyToOne(cascade = CascadeType.ALL)

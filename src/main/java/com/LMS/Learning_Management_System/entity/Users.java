@@ -11,6 +11,7 @@ import java.util.Date;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private int userId;
 
     @Column(unique = true)
@@ -24,7 +25,7 @@ public class Users {
     private Date registrationDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_type_id", referencedColumnName = "userTypeId" , nullable = false)
+    @JoinColumn(name = "user_type_id", referencedColumnName = "user_type_id" , nullable = false)
     private UsersType userTypeId;
 
 
