@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class Admin {
     @Id
     private int userAccountId;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_account_id")
     @MapsId
     private Users userId;
