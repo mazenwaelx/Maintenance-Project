@@ -7,7 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Entity
-@Table(name ="users")
+@Table(name = "users")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,19 +25,25 @@ public class Users {
     private Date registrationDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_type_id", referencedColumnName = "user_type_id" , nullable = false)
-    private UsersType userTypeId;
+    @JoinColumn(name = "user_type_id", referencedColumnName = "user_type_id", nullable = false)
+    private UsersType userType;
 
 
     public Users() {
     }
 
-    public Users(int userId, String email, String password,  Date registrationDate, UsersType userTypeId) {
+    public Users(int userId, String email, String password,  Date registrationDate, UsersType userType) {
         this.userId = userId;
         this.email = email;
         this.password = password;
         this.registrationDate = registrationDate;
-        this.userTypeId = userTypeId;
+        this.userType = userType;
+    }
+
+    public Users(String email, String password, UsersType userType) {
+        this.email = email;
+        this.password = password;
+        this.userType = userType;
     }
 
     public int getUserId() {
@@ -73,11 +79,11 @@ public class Users {
     }
 
     public UsersType getUserTypeId() {
-        return userTypeId;
+        return userType;
     }
 
-    public void setUserTypeId(UsersType userTypeId) {
-        this.userTypeId = userTypeId;
+    public void setUserTypeId(UsersType userType) {
+        this.userType = userType;
     }
 
 
@@ -90,7 +96,7 @@ public class Users {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", registrationDate=" + registrationDate +
-                ", userTypeId=" + userTypeId +
+                ", userTypeId=" + userType +
                 '}';
     }
 }

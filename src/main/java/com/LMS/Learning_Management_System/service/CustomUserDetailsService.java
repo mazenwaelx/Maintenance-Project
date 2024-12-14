@@ -3,12 +3,15 @@ package com.LMS.Learning_Management_System.service;
 
 import com.LMS.Learning_Management_System.entity.Users;
 import com.LMS.Learning_Management_System.repository.UsersRepository;
-import com.LMS.Learning_Management_System.util.CustomUserDetails;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 @Service
 
@@ -28,8 +31,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     // which adapts the Users entity to Spring Security’s UserDetails interface.
     // This allows Spring Security to recognize and use the user’s credentials and authorities during authentication.
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = usersRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Could not found user"));
-        return new CustomUserDetails(user);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Users user = usersRepository.findByEmail(email);
+        if(user == null) {
+            throw new UsernameNotFoundException(email);
+        }
+        String userTypeName = user.getUserTypeId().getUserTypeName();
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userTypeName.toUpperCase());
+
+        // Return UserDetails with authorities
+        return new User(user.getEmail(), user.getPassword(), Collections.singletonList(authority));
     }
 }

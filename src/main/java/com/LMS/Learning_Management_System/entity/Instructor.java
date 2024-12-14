@@ -29,6 +29,31 @@ public class Instructor {
     public Instructor(Users savedUser) {
         this.userId = savedUser;
     }
+    public int getUserAccountId() {
+        return userAccountId;
+    }
+    public void setUserAccountId(int userAccountId) {
+        this.userAccountId = userAccountId;
+    }
+    public Users getUserId() {
+        return userId;
+
+    }
+    public void setUserId(Users userId) {
+        this.userId = userId;
+    }
+    public String getFirstName() {
+        return firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     @Override
     public String toString() {

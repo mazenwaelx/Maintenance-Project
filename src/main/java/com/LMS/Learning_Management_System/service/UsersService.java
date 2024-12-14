@@ -1,119 +1,46 @@
 package com.LMS.Learning_Management_System.service;
 
 import com.LMS.Learning_Management_System.entity.*;
-import com.LMS.Learning_Management_System.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.LMS.Learning_Management_System.repository.UsersRepository;
+import com.LMS.Learning_Management_System.repository.UsersTypeRepository;
+import com.LMS.Learning_Management_System.util.UserSignUpRequest;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
-
 @Service
 public class UsersService {
-
     private final UsersRepository usersRepository;
-    private final AdminRepository AdminRepository;
-    private final UsersTypeRepository usersTypeRepository;
-    private final InstructorRepository InstructorRepository;
-    private final StudentRepository StudentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UsersTypeRepository usersTypeRepository;
 
-    @Autowired
-    public UsersService(UsersRepository usersRepository, AdminRepository adminRepository, UsersTypeRepository usersTypeRepository, InstructorRepository instructorRepository, StudentRepository studentRepository, PasswordEncoder passwordEncoder) {
-        this.usersRepository = usersRepository;
-        this.AdminRepository = adminRepository;
-        this.usersTypeRepository = usersTypeRepository;
-        this.InstructorRepository = instructorRepository;
-        this.StudentRepository = studentRepository;
+
+    public UsersService(UsersRepository usersRepository, InstructorService instructorService ,AdminService adminService, PasswordEncoder passwordEncoder,StudentService studentService , UsersTypeRepository usersTypeRepository) {
         this.passwordEncoder = passwordEncoder;
+        this.usersRepository = usersRepository;
+        this.usersTypeRepository = usersTypeRepository;
     }
 
-    public Users addNew(Users users) {
-        users.setRegistrationDate(new Date(System.currentTimeMillis()));
-        users.setPassword(passwordEncoder.encode(users.getPassword()));
-
-        // Validate and fetch UserType
-        Integer userTypeId = users.getUserTypeId() != null ? users.getUserTypeId().getUserTypeId() : null;
-        if (userTypeId == null) {
-            throw new IllegalArgumentException("UserType cannot be null");
+    public void save(UserSignUpRequest signUpRequest ) {
+        if (usersRepository.findByEmail(signUpRequest.getEmail()) != null) {
+            throw new IllegalArgumentException("Email already in use");
         }
-        UsersType usersType = usersTypeRepository.findById(userTypeId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid UserType ID"));
-        users.setUserTypeId(usersType);
-
-        // Save user and related entity
-        Users savedUser = usersRepository.save(users);
-        switch (userTypeId) {
-            case 1:
-                AdminRepository.save(new Admin(savedUser));
-                break;
-            case 2:
-                StudentRepository.save(new Student(savedUser));
-                break;
-            case 3:
-                InstructorRepository.save(new Instructor(savedUser));
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid UserType ID");
-        }
-
-        return savedUser;
+        UsersType userType = usersTypeRepository.findById(signUpRequest.getUserTypeId())
+                .orElseThrow(() -> new EntityNotFoundException("User Type not found"));
+        Users newUser = new Users(
+                signUpRequest.getEmail(),
+                passwordEncoder.encode(signUpRequest.getPassword()),
+                userType
+        );
+        usersRepository.save(newUser);
     }
 
-
-
-    public Object getCurrentUserInformation() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String username = authentication.getName();
-            Users users = usersRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException("Could not found " + "user"));
-            int userId = users.getUserId();
-            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("Admin"))) {
-                Admin admin = AdminRepository.findById(userId).orElse(new Admin());
-                return admin;
-            } else if(authentication.getAuthorities().contains(new SimpleGrantedAuthority("Student"))){
-                Student student = StudentRepository.findById(userId).orElse(new Student());
-                return student;
-            }else{
-                Instructor instructor = InstructorRepository.findById(userId).orElse(new Instructor());
-                return instructor;
-            }
-        }
-
-        return null;
-    }
-
-    public Users getCurrentUser() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String username = authentication.getName();
-            Users user = usersRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Could not found " + "user"));
-            return user;
-        }
-
-        return null;
-    }
-
-    public Users findByEmail(String currentUsername) {
-        return usersRepository.findByEmail(currentUsername).orElseThrow(() -> new UsernameNotFoundException("User not " +
-                "found"));
-    }
-
-    public Optional<Users> getUserByEmail(String email) {
+    public Users findByEmail(String email) {
         return usersRepository.findByEmail(email);
     }
-    public boolean validatePassword(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
-    }
 
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword); // Use the PasswordEncoder to match the passwords
+    }
 
 }
