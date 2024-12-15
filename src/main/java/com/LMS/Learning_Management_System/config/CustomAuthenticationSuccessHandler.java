@@ -24,17 +24,16 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         boolean hasInstructorRole = authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("INSTRUCTOR"));
         boolean hasStudentRole = authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("STUDENT"));
 
-        // Prepare the JSON response
+
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("message", "Login successful");
         responseBody.put("username", username);
         responseBody.put("roles", authentication.getAuthorities());
 
-        // Set HTTP response headers
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
 
-        // Write the JSON response
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(response.getWriter(), responseBody);
 

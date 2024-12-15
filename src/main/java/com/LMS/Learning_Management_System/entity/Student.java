@@ -9,7 +9,7 @@ public class Student {
     @Id
     private int userAccountId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_account_id")
     @MapsId
     //    This annotation tells JPA that the primary key of the current entity

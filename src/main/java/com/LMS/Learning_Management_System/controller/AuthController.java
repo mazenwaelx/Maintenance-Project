@@ -3,17 +3,12 @@ import com.LMS.Learning_Management_System.entity.Users;
 import com.LMS.Learning_Management_System.service.*;
 import com.LMS.Learning_Management_System.util.UserSignUpRequest;
 import jakarta.persistence.EntityNotFoundException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
