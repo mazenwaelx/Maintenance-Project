@@ -26,6 +26,18 @@ public class Question {
     @Column(name = "options", columnDefinition = "json")
     private String options;
 
+    public Course getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Course courseId) {
+        this.courseId = courseId;
+    }
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "course_id", referencedColumnName = "course_id")
+    private Course courseId;
+
     @Column(name = "correct_answer", nullable = false)
     private String correctAnswer;
 
