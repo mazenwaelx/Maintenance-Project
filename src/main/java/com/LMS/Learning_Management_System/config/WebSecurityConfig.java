@@ -18,6 +18,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**", "/api/student/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/course/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.disable())

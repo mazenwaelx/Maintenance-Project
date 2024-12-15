@@ -36,6 +36,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+    @GetMapping("/ha")
+    public String x(){
+        return "haha";
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(HttpServletRequest request, @RequestParam String email, @RequestParam String  password) {
         try {
