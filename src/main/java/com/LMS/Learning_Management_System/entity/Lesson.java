@@ -22,7 +22,6 @@ public class Lesson {
 
     private int lessonOrder;
 
-    @Column(length = 10)
     private String OTP;
 
     private String content;

@@ -37,7 +37,7 @@ public class Course {
 
     }
 
-    public Course(int courseId, String courseName, Instructor instructorId, String description, String media, int duration, Date creationDate, List<Lesson> lessons) {
+    public Course(int courseId, String courseName, Instructor instructorId, String description, String media, int duration, Date creationDate) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.instructorId = instructorId;
