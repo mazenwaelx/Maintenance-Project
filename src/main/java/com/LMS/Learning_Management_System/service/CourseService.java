@@ -6,6 +6,10 @@ import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -89,6 +93,27 @@ public class CourseService {
     public void deleteCourse(int courseId, HttpServletRequest request) {
         Course existingCourse = check_before_logic(courseId , request);
         courseRepository.delete(existingCourse);
+    }
+    public void uploadMediaFile(int courseId, MultipartFile file, HttpServletRequest request) {
+        Course course = check_before_logic(courseId , request);
+
+        String uploadDir = "media/uploads/";
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        File destination = new File(uploadDir + fileName);
+
+        try {
+            file.transferTo(destination);
+        } catch (IOException e) {
+            throw new RuntimeException("File upload failed.", e);
+        }
+
+        course.setMedia(fileName);
+        courseRepository.save(course);
     }
 
 

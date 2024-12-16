@@ -1,7 +1,5 @@
 package com.LMS.Learning_Management_System.controller;
-
 import com.LMS.Learning_Management_System.entity.Instructor;
-import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.service.InstructorService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.LMS.Learning_Management_System.entity.Users;
 import com.LMS.Learning_Management_System.service.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -71,6 +72,21 @@ public class CourseController {
             return ResponseEntity.ok("Course deleted successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/upload_media/{courseId}")
+    public ResponseEntity<String> uploadMedia(@PathVariable int courseId,
+                                              @RequestParam("file") MultipartFile file,
+                                              HttpServletRequest request) {
+        try {
+            courseService.uploadMediaFile(courseId, file, request);
+            return ResponseEntity.ok("File uploaded successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
     }
 
