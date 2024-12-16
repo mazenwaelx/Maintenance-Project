@@ -1,6 +1,7 @@
 package com.LMS.Learning_Management_System.controller;
 
 import com.LMS.Learning_Management_System.dto.LessonDto;
+import com.LMS.Learning_Management_System.entity.Course;
 import com.LMS.Learning_Management_System.entity.Lesson;
 import com.LMS.Learning_Management_System.service.LessonService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,10 +35,33 @@ public class LessonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
-    // get all lesson for specifing course id
-    // get specific lesson
-    // update specific lesson
-    // delete specific lesson
-}
+    @GetMapping("/lesson_id/{lessonId}")
+    public ResponseEntity<?> getLessonById(@PathVariable int lessonId , HttpServletRequest request) {
+        try {
+            LessonDto lesson = lessonService.getLessonById(lessonId, request);
+            return ResponseEntity.ok(lesson);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PutMapping("/update/lesson_id/{lessonId}")
+    public ResponseEntity<String> updateLesson(
+            @PathVariable int lessonId,
+            @RequestBody Lesson updatedLesson,
+            HttpServletRequest request) {
+        try {
+            lessonService.updateLesson(lessonId, updatedLesson, request);
+            return ResponseEntity.ok("Lesson updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @DeleteMapping("/delete/lesson_id/{lessonId}/course_id/{courseId}")
+    public ResponseEntity<String> deleteLesson(@PathVariable int lessonId , @PathVariable int courseId,HttpServletRequest request) {
+        try {
+            lessonService.deleteLesson(lessonId, courseId , request);
+            return ResponseEntity.ok("Lesson deleted successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }}

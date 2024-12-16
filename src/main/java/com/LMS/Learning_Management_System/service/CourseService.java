@@ -33,7 +33,7 @@ public class CourseService {
             throw new IllegalArgumentException("Logged-in user is not an instructor.");
         }
         if(instructorId != loggedInInstructor.getUserId()){
-            throw new IllegalArgumentException("Logged-in user is not an another instructor.");
+            throw new IllegalArgumentException("Logged-in user is an another instructor.");
         }
         //
 

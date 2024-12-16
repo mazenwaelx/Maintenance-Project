@@ -1,7 +1,9 @@
 package com.LMS.Learning_Management_System.service;
 
 import com.LMS.Learning_Management_System.entity.Student;
+import com.LMS.Learning_Management_System.entity.Users;
 import com.LMS.Learning_Management_System.repository.StudentRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,7 +19,17 @@ public class StudentService {
         return studentRepository.findById(userId);
     }
 
-    public void save(Student student) {
-        studentRepository.save(student); // Save the student entity
+    public void save(int studentId ,Student student , HttpServletRequest request) {
+        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+        if (loggedInInstructor == null) {
+            throw new IllegalArgumentException("User is not logged in.");
+        }
+        if(studentId != loggedInInstructor.getUserId()) {
+            throw new IllegalArgumentException("You are not authorized to perform this action.");
+        }
+        Student newStudent = studentRepository.getReferenceById(studentId);
+        newStudent.setFirstName(student.getFirstName());
+        newStudent.setLastName(student.getLastName());
+        studentRepository.save(newStudent);
     }
 }

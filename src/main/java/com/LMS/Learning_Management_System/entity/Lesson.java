@@ -13,7 +13,7 @@ public class Lesson {
     @Column(name = "lesson_id")
     private int lessonId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "course_id", referencedColumnName = "course_id")
     private Course courseId;
 

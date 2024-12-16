@@ -1,7 +1,10 @@
 package com.LMS.Learning_Management_System.controller;
 
+
 import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.service.StudentService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -12,12 +15,16 @@ public class StudentController {
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
     }
-    @PostMapping("/update_student")
-    public void updateUser(@RequestParam Long userId, @RequestParam String firstName, @RequestParam String secondName) {
-        Student student = studentService.findById(userId.intValue())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        student.setFirstName(firstName);
-        student.setLastName(secondName);
-        studentService.save(student);
+    @PutMapping("/update_profile/{studentId}")
+    public ResponseEntity<String> updateUser(@PathVariable int studentId,
+                           @RequestBody Student student,
+                           HttpServletRequest request
+    ) {
+        try {
+            studentService.save(studentId, student, request);
+            return ResponseEntity.ok("Student updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -1,11 +1,11 @@
 package com.LMS.Learning_Management_System.controller;
 
 import com.LMS.Learning_Management_System.entity.Instructor;
+import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.service.InstructorService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/instructor")
@@ -15,12 +15,16 @@ public class InstructorController {
     public InstructorController(InstructorService instructorService) {
         this.instructorService = instructorService;
     }
-    @PostMapping("/update_instructor")
-    public void updateUser(@RequestParam Long userId, @RequestParam String firstName, @RequestParam String secondName) {
-        Instructor instructor = instructorService.findById(userId.intValue())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        instructor.setFirstName(firstName);
-        instructor.setLastName(secondName);
-        instructorService.save(instructor);
+    @PutMapping("/update_profile/{instructorId}")
+    public ResponseEntity<String> updateUser(@PathVariable int instructorId,
+                                             @RequestBody Instructor instructor,
+                                             HttpServletRequest request
+    ) {
+        try {
+            instructorService.save(instructorId, instructor, request);
+            return ResponseEntity.ok("Instructor updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
