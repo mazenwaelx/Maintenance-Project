@@ -7,6 +7,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
@@ -34,6 +36,7 @@ public class UsersService {
                 passwordEncoder.encode(signUpRequest.getPassword()),
                 userType
         );
+        newUser.setRegistrationDate(new Date());
         usersRepository.save(newUser);
 
         if(newUser.getUserTypeId().getUserTypeId()==1)

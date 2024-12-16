@@ -6,9 +6,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -32,13 +36,16 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<String> login(HttpServletRequest request, @RequestParam String email, @RequestParam String  password) {
+    public ResponseEntity<String> login(HttpServletRequest request, @RequestParam String email, @RequestParam String password) {
         try {
             Users user = usersService.findByEmail(email);
             if (usersService.validatePassword(password, user.getPassword())) {
                 request.getSession().setAttribute("user", user);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(email, null, List.of());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
                 return ResponseEntity.ok("Login successful. Welcome, " + user.getEmail());
             } else {
                 return ResponseEntity.badRequest().body("Invalid email or password.");
@@ -47,6 +54,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Invalid email or password.");
         }
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {

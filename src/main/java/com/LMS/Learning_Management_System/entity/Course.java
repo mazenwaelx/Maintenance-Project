@@ -16,7 +16,8 @@ public class Course {
 
     private String courseName;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    // when delete course didnot delete instructor
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "instructor_id", referencedColumnName = "user_account_id")
     private Instructor instructorId;
 

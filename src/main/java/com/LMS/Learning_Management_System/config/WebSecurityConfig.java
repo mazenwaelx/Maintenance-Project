@@ -19,6 +19,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/users/**", "/api/student/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
+                        .requestMatchers("/api/lesson/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.disable())
