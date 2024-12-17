@@ -5,19 +5,22 @@ package com.LMS.Learning_Management_System.dto;
 public class CourseDto {
     private int courseId;
     private String courseName;
-    private int instructorId;
     private String description;
     private int duration;
+    private String instructorName;
+    private String media;
 
     public CourseDto() {
     }
 
-    public CourseDto(int courseId, String courseName, int instructorId, String description, int duration) {
+    public CourseDto(int courseId, String courseName, String description, int duration, String media ,String instructorName) {
         this.courseId = courseId;
         this.courseName = courseName;
-        this.instructorId = instructorId;
         this.description = description;
         this.duration = duration;
+        this.media = media;
+        this.instructorName = instructorName;
+
     }
 
     public String getCourseName() {
@@ -36,14 +39,6 @@ public class CourseDto {
         this.courseId = courseId;
     }
 
-    public int getInstructorId() {
-        return instructorId;
-    }
-
-    public void setInstructorId(int instructorId) {
-        this.instructorId = instructorId;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -58,5 +53,17 @@ public class CourseDto {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+    public String getInstructorName() {
+        return instructorName;
+    }
+    public void setInstructorName(String instructorName) {
+        this.instructorName = instructorName;
+    }
+    public String getMedia() {
+        return media;
+    }
+    public void setMedia(String media) {
+        this.media = media;
     }
 }

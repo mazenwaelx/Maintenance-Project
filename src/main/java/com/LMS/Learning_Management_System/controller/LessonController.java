@@ -44,6 +44,7 @@ public class LessonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @PutMapping("/update/lesson_id/{lessonId}")
     public ResponseEntity<String> updateLesson(
             @PathVariable int lessonId,
@@ -64,4 +65,21 @@ public class LessonController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }}
+    }
+    @PostMapping("/studnet_enter_lesson/course_id/{courseId}/lesson_id/{lessonId}/otp/{otp}")
+    public ResponseEntity<?> StudentEnterLesson(@PathVariable int courseId ,
+                                                @PathVariable int lessonId ,
+                                                @PathVariable String otp ,
+                                                HttpServletRequest request) {
+        try{
+            lessonService.StudentEnterLesson( courseId , lessonId  , otp,request);
+            return ResponseEntity.ok("Student entered lesson successfully.");
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+}
+

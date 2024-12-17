@@ -1,16 +1,11 @@
 package com.LMS.Learning_Management_System.controller;
-
-import com.LMS.Learning_Management_System.dto.LessonDto;
 import com.LMS.Learning_Management_System.dto.StudentDto;
 import com.LMS.Learning_Management_System.entity.Enrollment;
-import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.service.EnrollmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/enrollment")
 public class EnrollmentController {

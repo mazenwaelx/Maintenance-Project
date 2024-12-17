@@ -4,10 +4,8 @@ import com.LMS.Learning_Management_System.dto.CourseDto;
 import com.LMS.Learning_Management_System.entity.*;
 import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -18,14 +16,12 @@ import java.util.stream.Collectors;
 public class CourseService {
     private final InstructorRepository instructorRepository;
     private final CourseRepository courseRepository;
-    private final LessonRepository lessonRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-
-    public CourseService(InstructorRepository instructorRepository, CourseRepository courseRepository, LessonRepository lessonRepository, LessonRepository lessonRepository1) {
+    public CourseService(InstructorRepository instructorRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
         this.instructorRepository = instructorRepository;
         this.courseRepository = courseRepository;
-
-        this.lessonRepository = lessonRepository1;
+        this.enrollmentRepository = enrollmentRepository;
     }
     public void addCourse(Course course , HttpServletRequest request , int instructorId){
         // auth
@@ -72,14 +68,28 @@ public class CourseService {
         }
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No course found with the given ID: " + id));
-
+        if(loggedInInstructor.getUserTypeId().getUserTypeId() == 2){
+            int flag = 0;
+            List<Enrollment>enrollments = enrollmentRepository.findByCourse(course);
+            for (Enrollment enrollment : enrollments) {
+                if(enrollment.getStudent().getUserAccountId() == loggedInInstructor.getUserId()){
+                    flag = 1;
+                }
+            }
+            if(flag==0)
+            {
+                throw new IllegalArgumentException("You are not enrolled to this course.");
+            }
+        }
         return new CourseDto(
                 course.getCourseId(),
                 course.getCourseName(),
-                course.getInstructorId().getUserAccountId(),
                 course.getDescription(),
-                course.getDuration()
+                course.getDuration(),
+                course.getMedia(),
+                course.getInstructorId().getFirstName()
         );
+
     }
     public void updateCourse(int courseId, Course updatedCourse, HttpServletRequest request) {
 
@@ -142,9 +152,10 @@ public class CourseService {
                 .map(course -> new CourseDto(
                         course.getCourseId(),
                         course.getCourseName(),
-                        course.getInstructorId().getUserAccountId(),  // Assuming instructor is a related entity
                         course.getDescription(),
-                        course.getDuration()
+                        course.getDuration(),
+                        course.getMedia(),
+                        course.getInstructorId().getFirstName()
                 ))
                 .collect(Collectors.toList());
     }
