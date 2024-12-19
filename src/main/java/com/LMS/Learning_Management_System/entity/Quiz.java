@@ -30,13 +30,20 @@ public class Quiz {
 
     @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date creationDate;
 
     public Quiz() {}
 
     public Quiz(int quizId, String title, Course course, Integer questionCount, Boolean randomized, Date creationDate) {
         this.quizId = quizId;
+        this.title = title;
+        this.course = course;
+        this.questionCount = questionCount;
+        this.randomized = randomized;
+        this.creationDate = creationDate;
+    }
+    public Quiz( String title, Course course, Integer questionCount, Boolean randomized, Date creationDate) {
         this.title = title;
         this.course = course;
         this.questionCount = questionCount;

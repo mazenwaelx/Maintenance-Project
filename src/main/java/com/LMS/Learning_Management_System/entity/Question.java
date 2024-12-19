@@ -1,7 +1,7 @@
 package com.LMS.Learning_Management_System.entity;
 
 import jakarta.persistence.*;
-//
+
 
 @Entity
 @Table(name = "question")
@@ -45,6 +45,13 @@ public class Question {
 
     public Question(int questionId, Quiz quiz, String questionText, QuestionType questionType, String options, String correctAnswer) {
         this.questionId = questionId;
+        this.quiz = quiz;
+        this.questionText = questionText;
+        this.questionType = questionType;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+    }
+    public Question( Quiz quiz, String questionText, QuestionType questionType, String options, String correctAnswer) {
         this.quiz = quiz;
         this.questionText = questionText;
         this.questionType = questionType;
