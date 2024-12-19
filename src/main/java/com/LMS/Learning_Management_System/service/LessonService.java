@@ -1,10 +1,7 @@
 package com.LMS.Learning_Management_System.service;
 import com.LMS.Learning_Management_System.dto.LessonDto;
 import com.LMS.Learning_Management_System.entity.*;
-import com.LMS.Learning_Management_System.repository.CourseRepository;
-import com.LMS.Learning_Management_System.repository.EnrollmentRepository;
-import com.LMS.Learning_Management_System.repository.LessonRepository;
-import com.LMS.Learning_Management_System.repository.StudentRepository;
+import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
@@ -19,11 +16,13 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final LessonAttendanceRepository lessonAttendanceRepository;
 
-    public LessonService(LessonRepository lessonRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
+    public LessonService(LessonRepository lessonRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, LessonAttendanceRepository lessonAttendanceRepository) {
         this.lessonRepository = lessonRepository;
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.lessonAttendanceRepository = lessonAttendanceRepository;
     }
 
     public void addLesson(Lesson lesson, HttpServletRequest request) {
@@ -181,6 +180,18 @@ public class LessonService {
         {
             throw new IllegalArgumentException("OTP does not match.");
         }
+        // part for attendance tracking
+        Student student = new Student();
+        student.setUserAccountId(loggedInInstructor.getUserId());
+        boolean enteredAlready = lessonAttendanceRepository.existsByLessonIdAndStudentId( existingLesson,student);
+        if(enteredAlready){
+            return;
+        }
+        LessonAttendance lessonAttendance= new LessonAttendance();
+        lessonAttendance.setLessonId(existingLesson);
+        lessonAttendance.setStudentId(student);
+        lessonAttendanceRepository.save(lessonAttendance);
+
 
     }
 }
