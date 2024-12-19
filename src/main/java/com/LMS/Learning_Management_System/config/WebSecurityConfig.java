@@ -20,6 +20,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
                         .requestMatchers("/api/lesson/**").permitAll()
+                        .requestMatchers("/api/assignment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.disable())
