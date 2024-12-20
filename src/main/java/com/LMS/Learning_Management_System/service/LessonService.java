@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -193,5 +194,42 @@ public class LessonService {
         lessonAttendanceRepository.save(lessonAttendance);
 
 
+    }
+
+    public List <String> lessonAttendance (int lessonId, HttpServletRequest request)
+    {
+        if (lessonRepository.existsById(lessonId))
+        {
+            Lesson lesson = lessonRepository.findById(lessonId).get();
+            List <LessonAttendance> lessonAttendances = lessonAttendanceRepository.findAllByLessonId(lesson);
+            Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+            int instructorId = lesson.getCourseId().getInstructorId().getUserAccountId();
+
+            if (loggedInInstructor == null)
+            {
+                throw new IllegalArgumentException("No logged in user is found.");
+            }
+            else if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3)
+            {
+                throw new IllegalArgumentException("Logged-in user is not an instructor.");
+            }
+            else if (instructorId != loggedInInstructor.getUserId())
+            {
+                throw new IllegalArgumentException("Logged-in instructor does not have access for this lesson attendances.");
+            }
+
+            List <String> attendances = new ArrayList<>();
+            for (LessonAttendance lessonAttendance : lessonAttendances)
+            {
+                Student student = lessonAttendance.getStudentId();
+                String studentName = student.getFirstName() + ' ' + student.getLastName();
+                attendances.add(studentName);
+            }
+            return attendances;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Assignment with ID " + lessonId + " not found.");
+        }
     }
 }

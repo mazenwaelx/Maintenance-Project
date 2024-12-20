@@ -13,7 +13,7 @@ public class Grading {
     private int grade;
     @ManyToOne
     @JoinColumn(name = "quiz_id",referencedColumnName = "quiz_id")
-    private Quiz quiz_id;
+    private Quiz quizId;
 
 
     @ManyToOne
@@ -24,7 +24,7 @@ public class Grading {
 
     public Grading( int grade, Quiz quiz_id, Student student_id) {
         this.grade = grade;
-        this.quiz_id = quiz_id;
+        this.quizId = quiz_id;
         this.student_id = student_id;
     }
 
@@ -45,11 +45,11 @@ public class Grading {
     }
 
     public Quiz getQuiz_id() {
-        return quiz_id;
+        return quizId;
     }
 
     public void setQuiz_id(Quiz quiz_id) {
-        this.quiz_id = quiz_id;
+        this.quizId = quiz_id;
     }
 
     public Student getStudent_id() {

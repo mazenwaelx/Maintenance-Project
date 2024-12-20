@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -81,5 +82,17 @@ public class LessonController {
         }
     }
 
+    @GetMapping("/attendances/{lessonId}")
+    public ResponseEntity <List <String>> trackLessonAttendances (@PathVariable int lessonId, HttpServletRequest request)
+    {
+        try
+        {
+            List <String> submissions = lessonService.lessonAttendance(lessonId, request);
+            return ResponseEntity.ok(submissions);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(Collections.singletonList(e.getMessage()));
+        }
+    }
 }
-

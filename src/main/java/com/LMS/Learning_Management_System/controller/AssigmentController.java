@@ -2,10 +2,16 @@ package com.LMS.Learning_Management_System.controller;
 
 import com.LMS.Learning_Management_System.dto.AssignmentDto;
 import com.LMS.Learning_Management_System.entity.Assignment;
+import com.LMS.Learning_Management_System.entity.Student;
+import com.LMS.Learning_Management_System.entity.Submission;
 import com.LMS.Learning_Management_System.service.AssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/assignment")
@@ -52,6 +58,20 @@ public class AssigmentController {
             return ResponseEntity.ok(assignmentService.getFeedback(assignmentId, request));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/submissions/{assignmentId}")
+    public ResponseEntity <List <String>> trackAssignmentSubmissions (@PathVariable int assignmentId, HttpServletRequest request)
+    {
+        try
+        {
+            List <String> submissions = assignmentService.assignmentSubmissions(assignmentId, request);
+            return ResponseEntity.ok(submissions);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(Collections.singletonList(e.getMessage()));
         }
     }
 }

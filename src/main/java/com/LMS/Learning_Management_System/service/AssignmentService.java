@@ -6,6 +6,7 @@ import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -180,4 +181,41 @@ public class AssignmentService {
         return feedback;
     }
 
+    public List <String> assignmentSubmissions (int assignmentId, HttpServletRequest request)
+    {
+        if (assignmentRepository.existsById(assignmentId))
+        {
+            Assignment assignment = assignmentRepository.findById(assignmentId).get();
+            List <Submission> assignmentSubmissions = submissionRepository.findAllByAssignmentId(assignment);
+            Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+            int instructorId = assignment.getCourseID().getInstructorId().getUserAccountId();
+
+            if (loggedInInstructor == null)
+            {
+                throw new IllegalArgumentException("No logged in user is found.");
+            }
+            else if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3)
+            {
+                throw new IllegalArgumentException("Logged-in user is not an instructor.");
+            }
+            else if (instructorId != loggedInInstructor.getUserId())
+            {
+                throw new IllegalArgumentException("Logged-in instructor does not have access for this assignment submissions.");
+            }
+
+            List <String> submissions = new ArrayList<>();
+            for (Submission submission : assignmentSubmissions)
+            {
+                Student student = submission.getStudentId();
+                String studentName = student.getFirstName() + ' ' + student.getLastName();
+                String studentSubmission = studentName + ": " + submission.getFilePath();
+                submissions.add(studentSubmission);
+            }
+            return submissions;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Assignment with ID " + assignmentId + " not found.");
+        }
+    }
 }

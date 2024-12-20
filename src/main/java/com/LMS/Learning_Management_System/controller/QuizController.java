@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/quiz")
 public class QuizController {
@@ -95,17 +98,6 @@ public class QuizController {
         }
     }
 
-    // get all grades
-    @GetMapping("/get_quiz_grade/{id}")
-    public ResponseEntity<?> getQuizGrades(@PathVariable int id, HttpServletRequest request)
-    {
-        try {
-            return ResponseEntity.ok(quizService.getQuizGrades(id));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     // get quiz questions
     @GetMapping("/get_quiz_questions/{id}")
     public ResponseEntity<?> getQuizQuestions(@PathVariable int id, HttpServletRequest request)
@@ -114,6 +106,20 @@ public class QuizController {
             return ResponseEntity.ok(quizService.getQuizQuestions(id));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/grades/{quizId}")
+    public ResponseEntity <List<String>> trackQuizGrades (@PathVariable int quizId, HttpServletRequest request)
+    {
+        try
+        {
+            List <String> submissions = quizService.quizGrades(quizId, request);
+            return ResponseEntity.ok(submissions);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().body(Collections.singletonList(e.getMessage()));
         }
     }
 }

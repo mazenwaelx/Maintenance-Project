@@ -298,22 +298,41 @@ public class QuizService {
 
     }
 
-    //return all grades by a given quiz
-    public List<Pair<Integer,Integer>> getQuizGrades(int quiz_id)
+    public List <String> quizGrades (int quizId, HttpServletRequest request)
     {
-        Optional<Quiz> optionalQuiz= Optional.ofNullable(quizRepository.findById(quiz_id)
-                .orElseThrow(() -> new EntityNotFoundException("No such Quiz")));
-        List<Integer>students = gradingRepository.findStudentByQuiz(quiz_id);
-        List<Integer>grades = gradingRepository.findGradeByQuizId(quiz_id);
-        List<Pair<Integer, Integer>> pairedList = new ArrayList<>();
-        int size = Math.min(students.size(), grades.size());
+        if (quizRepository.existsById(quizId))
+        {
+            Quiz quiz = quizRepository.findById(quizId).get();
+            List <Grading> quizGrades = gradingRepository.findAllByQuizId(quiz);
+            Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+            int instructorId = quiz.getCourse().getInstructorId().getUserAccountId();
 
-        for (int i = 0; i < size; i++) {
-            pairedList.add(Pair.of(students.get(i), grades.get(i)));
+            if (loggedInInstructor == null)
+            {
+                throw new IllegalArgumentException("No logged in user is found.");
+            }
+            else if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3)
+            {
+                throw new IllegalArgumentException("Logged-in user is not an instructor.");
+            }
+            else if (instructorId != loggedInInstructor.getUserId())
+            {
+                throw new IllegalArgumentException("Logged-in instructor does not have access for this quiz gradings.");
+            }
+
+            List <String> grades = new ArrayList<>();
+            for (Grading grading : quizGrades)
+            {
+                Student student = grading.getStudent_id();
+                String studentName = student.getFirstName() + ' ' + student.getLastName();
+                String studentGrade = studentName + ": " + grading.getGrade();
+                grades.add(studentGrade);
+            }
+            return grades;
         }
-
-        return pairedList;
-
+        else
+        {
+            throw new IllegalArgumentException("Quiz with ID " + quizId + " not found.");
+        }
     }
-
 }

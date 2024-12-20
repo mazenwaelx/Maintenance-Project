@@ -16,11 +16,13 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**", "/api/student/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**", "/api/student/**" , "/api/instructor/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/enrollment/**").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
                         .requestMatchers("/api/lesson/**").permitAll()
                         .requestMatchers("/api/quiz/**").permitAll()
+                        .requestMatchers("/api/assignment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.disable())
