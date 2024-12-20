@@ -1,6 +1,7 @@
 package com.LMS.Learning_Management_System.service;
 
 import com.LMS.Learning_Management_System.dto.CourseDto;
+import com.LMS.Learning_Management_System.dto.StudentDto;
 import com.LMS.Learning_Management_System.entity.*;
 import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,11 +18,15 @@ public class CourseService {
     private final InstructorRepository instructorRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentService enrollmentService;
+    private final NotificationsService notificationsService;
 
-    public CourseService(InstructorRepository instructorRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository) {
+    public CourseService(InstructorRepository instructorRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService, NotificationsService notificationsService) {
         this.instructorRepository = instructorRepository;
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.enrollmentService = enrollmentService;
+        this.notificationsService = notificationsService;
     }
     public void addCourse(Course course , HttpServletRequest request , int instructorId){
         // auth
@@ -158,6 +163,14 @@ public class CourseService {
                         course.getInstructorId().getFirstName()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public void sendNotificationsToEnrolledStudents(int courseId, HttpServletRequest request){
+        List<StudentDto> students = enrollmentService.viewEnrolledStudents(courseId,request);
+        String message = getCourseById(courseId,request).getCourseName() + " course is updated";
+        for (StudentDto student : students){
+            notificationsService.sendNotification(message,student.getUserAccountId());
+        }
     }
 
 

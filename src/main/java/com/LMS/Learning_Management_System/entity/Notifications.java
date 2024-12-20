@@ -1,5 +1,6 @@
 package com.LMS.Learning_Management_System.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -16,13 +17,19 @@ public class Notifications {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JsonIgnore
     private Users userId;
 
     private String message;
 
     @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @Column(name = "created_at")
     private Date createdTime;
+
+    @Column(name = "is_read")
+    private boolean read;
+
     public Notifications() {
 
     }
@@ -54,6 +61,12 @@ public class Notifications {
     }
     public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
+    }
+    public boolean isRead() {
+        return read;
+    }
+    public void setRead(boolean read) {
+        this.read = read;
     }
 
     @Override

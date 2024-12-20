@@ -5,6 +5,7 @@ import com.LMS.Learning_Management_System.entity.Assignment;
 import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.entity.Submission;
 import com.LMS.Learning_Management_System.service.AssignmentService;
+import com.LMS.Learning_Management_System.service.NotificationsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,11 @@ import java.util.List;
 @RequestMapping("/api/assignment")
 public class AssigmentController {
     private final AssignmentService assignmentService;
+    private final NotificationsService notificationsService;
 
-    public AssigmentController(AssignmentService assignmentService) {
+    public AssigmentController(AssignmentService assignmentService, NotificationsService notificationsService) {
         this.assignmentService = assignmentService;
+        this.notificationsService = notificationsService;
     }
 
     @PostMapping("/uploadAssignment")
@@ -36,6 +39,8 @@ public class AssigmentController {
     public ResponseEntity<String> gradeAssignment(@PathVariable int studentID, @PathVariable int assigID, @PathVariable float grade, HttpServletRequest request ){
         try {
             assignmentService.gradeAssignment(studentID, assigID, grade, request);
+            String message = "Assignment "+assigID+" grade is uploaded";
+            notificationsService.sendNotification(message,studentID);
             return ResponseEntity.ok("Assignment has been graded successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

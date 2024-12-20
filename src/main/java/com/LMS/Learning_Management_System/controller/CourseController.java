@@ -59,6 +59,7 @@ public class CourseController {
             @RequestBody Course updatedCourse,
             HttpServletRequest request) {
         try {
+            courseService.sendNotificationsToEnrolledStudents(courseId,request);
             courseService.updateCourse(courseId, updatedCourse, request);
             return ResponseEntity.ok("Course updated successfully.");
         } catch (IllegalArgumentException e) {
