@@ -17,4 +17,6 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     List<Question> findQuestionsByQuizId(@Param("quizId") int quizId);
     @Query("SELECT q FROM Question q WHERE q.courseId.courseId = :courseId AND q.questionType.typeId = :questionType")
     List<Question> findQuestionsByCourseIdAndQuestionType(@Param("courseId") int courseId, @Param("questionType") int questionType);
+    @Query("SELECT q FROM Question q WHERE q.courseId.courseId = :courseId AND q.questionType.typeId = :questionType AND q.quiz.quizId IS NULL ")
+    List<Question> findEmptyQuestionsByCourseIdAndQuestionType(@Param("courseId") int courseId, @Param("questionType") int questionType);
 }

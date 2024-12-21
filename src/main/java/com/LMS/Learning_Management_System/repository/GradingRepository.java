@@ -12,11 +12,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface GradingRepository extends JpaRepository<Grading, Integer> {
     @Query("SELECT g.grade FROM Grading g WHERE g.quizId.quizId = :quizId AND g.student_id.userId.userId = :studentId")
     int findGradeByQuizAndStudentID(@Param("quizId") int quizId, @Param("studentId") int studentId);
+    @Query("SELECT COUNT(g)>0 "+
+            "FROM Grading g " +
+            "WHERE g.quizId.quizId = :quizId AND g.student_id.userId.userId = :studentId")
+    Optional<Boolean> boolFindGradeByQuizAndStudentID(@Param("quizId") int quizId, @Param("studentId") int studentId);
     @Query("SELECT g.student_id.userAccountId,g.grade FROM Grading g WHERE g.quizId.quizId = :quizId")
     Map<Integer,Integer> findGradeByQuiz(@Param("quizId") int quizId);
     @Query("SELECT g.student_id.userAccountId FROM Grading g WHERE g.quizId.quizId = :quizId")

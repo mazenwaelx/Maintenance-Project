@@ -40,6 +40,7 @@ public class AuthController {
     public ResponseEntity<String> login(HttpServletRequest request, @RequestParam String email, @RequestParam String password) {
         try {
             Users user = usersService.findByEmail(email);
+            if(user==null) return ResponseEntity.badRequest().body("invalid email");
             if (usersService.validatePassword(password, user.getPassword())) {
                 request.getSession().setAttribute("user", user);
                 UsernamePasswordAuthenticationToken authentication =
