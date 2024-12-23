@@ -115,7 +115,7 @@ public class AssignmentControllerTest {
     }
 
     @Test
-    void testTrackQuizGrades()
+    void testTrackAssignmentSubmissions()
     {
         List<String> ans = new ArrayList<String>();
 
