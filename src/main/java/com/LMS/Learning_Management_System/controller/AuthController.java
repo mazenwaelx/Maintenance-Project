@@ -25,9 +25,9 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody UserSignUpRequest signUpRequest) {
+    public ResponseEntity<String> signUp(@RequestBody UserSignUpRequest signUpRequest ,HttpServletRequest request) {
         try {
-            usersService.save(signUpRequest);
+            usersService.save(signUpRequest , request);
             return ResponseEntity.ok("User registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
