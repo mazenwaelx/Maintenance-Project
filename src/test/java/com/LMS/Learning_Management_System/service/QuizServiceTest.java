@@ -55,6 +55,7 @@ public class QuizServiceTest {
     private UsersType instructorType;
     private UsersType studentType;
     private Quiz quiz;
+    private Grading grading;
 
     @BeforeEach
     void setUp() {
@@ -85,6 +86,21 @@ public class QuizServiceTest {
         enrollment.getStudent().setUserAccountId(2);
         enrollment.setCourse(course);
         enrollment.setEnrollmentId(1);
+
+        Student student = new Student();
+        student.setUserAccountId(2);
+        student.setUserId(studentUser);
+
+        quiz = new Quiz();
+        quiz.setQuizId(1);
+        quiz.setTitle("Test Quiz");
+        quiz.setCourse(course);
+
+        grading = new Grading();
+        grading.setGradingId(1);
+        grading.setQuiz_id(quiz);
+        grading.setStudent_id(student);
+        grading.setGrade(75);
     }
 
     @Test
@@ -432,26 +448,97 @@ public class QuizServiceTest {
 
 
     }
+
     @Test
-    void testQuizGrades_inValid() {
+    void testQuizGrades_noLoggedInUser()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(null);
+        when(quizRepository.existsById(1)).thenReturn(true);
+        when(quizRepository.findById(1)).thenReturn(Optional.of(quiz));
+        when(gradingRepository.findAllByQuizId(quiz)).thenReturn(List.of(grading));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            quizService.quizGrades(1, request);
+        });
+
+        assertEquals("No logged in user is found.", exception.getMessage());
+    }
+
+    @Test
+    void testQuizGrades_notInstructor()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(studentUser);
+        when(quizRepository.existsById(1)).thenReturn(true);
+        when(quizRepository.findById(1)).thenReturn(Optional.of(quiz));
+        when(gradingRepository.findAllByQuizId(quiz)).thenReturn(List.of(grading));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            quizService.quizGrades(1, request);
+        });
+
+        assertEquals("Logged-in user is not an instructor.", exception.getMessage());
+    }
+
+    @Test
+    void testQuizGrades_notQuizInstructor()
+    {
+        Users inValidInstructorUser = new Users();
+        inValidInstructorUser.setUserId(3);
+        inValidInstructorUser.setUserTypeId(instructorType);
+
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(inValidInstructorUser);
+        when(quizRepository.existsById(1)).thenReturn(true);
+        when(quizRepository.findById(1)).thenReturn(Optional.of(quiz));
+        when(gradingRepository.findAllByQuizId(quiz)).thenReturn(List.of(grading));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            quizService.quizGrades(1, request);
+        });
+
+        assertEquals("Logged-in instructor does not have access for this quiz grades.", exception.getMessage());
+    }
+
+    @Test
+    void testQuizGrades_quizNotFound()
+    {
         HttpSession mockSession = mock(HttpSession.class);
         when(request.getSession()).thenReturn(mockSession);
 
         when(mockSession.getAttribute("user")).thenReturn(instructorUser);
-        when(quizRepository.existsById(1)).thenReturn(false);
 
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            quizService.quizGrades(1, request);
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            quizService.quizGrades(2, request);
         });
 
-        assertEquals("Quiz with ID " + "1" + " not found.",exception.getMessage());
-
-
+        assertEquals("Quiz with ID 2 not found.", exception.getMessage());
     }
 
+    @Test
+    void testQuizGrades()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
 
+        when(mockSession.getAttribute("user")).thenReturn(instructorUser);
+        when(quizRepository.existsById(1)).thenReturn(true);
+        when(quizRepository.findById(1)).thenReturn(Optional.of(quiz));
+        when(gradingRepository.findAllByQuizId(quiz)).thenReturn(List.of(grading));
 
+        List <String> quizGrades = quizService.quizGrades(1, request);
+
+        assertEquals(1, quizGrades.size());
+    }
 }
-
-

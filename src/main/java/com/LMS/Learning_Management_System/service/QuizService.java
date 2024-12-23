@@ -432,15 +432,14 @@ public class QuizService {
             }
             else if (instructorId != loggedInInstructor.getUserId())
             {
-                throw new IllegalArgumentException("Logged-in instructor does not have access for this quiz gradings.");
+                throw new IllegalArgumentException("Logged-in instructor does not have access for this quiz grades.");
             }
 
             List <String> grades = new ArrayList<>();
             for (Grading grading : quizGrades)
             {
                 Student student = grading.getStudent_id();
-                String studentName = student.getFirstName() + ' ' + student.getLastName();
-                String studentGrade = studentName + ": " + grading.getGrade();
+                String studentGrade = "(ID)" + student.getUserAccountId() + ": (Grade)" + grading.getGrade();
                 grades.add(studentGrade);
             }
             return grades;

@@ -144,16 +144,17 @@ class QuizControllerTest {
         assertEquals(ans,response.getBody());
         verify(quizService, times(1)).getQuizQuestions(eq(1), eq(request));
     }
+
     @Test
-    void testTrackQuizGrades() throws Exception {
-        List <String> ans = new ArrayList<String>();
+    void testTrackQuizGrades()
+    {
+        List <String> ans = new ArrayList <String>();
 
-        when(quizService.quizGrades(eq(1),eq(request))).thenReturn(ans);
+        when(quizService.quizGrades(eq(1), eq(request))).thenReturn(ans);
 
-        ResponseEntity<?> response = quizController.trackQuizGrades(1, request);
-        assertEquals(200,response.getStatusCodeValue());
-        assertEquals(ans,response.getBody());
+        ResponseEntity <?> response = quizController.trackQuizGrades(1, request);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(ans, response.getBody());
         verify(quizService, times(1)).quizGrades(eq(1), eq(request));
     }
-
 }

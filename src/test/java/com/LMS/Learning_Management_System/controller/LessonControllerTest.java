@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -132,5 +133,17 @@ class LessonControllerTest {
         assertEquals("Student entered lesson successfully.", response.getBody());
         verify(lessonService, times(1)).StudentEnterLesson(eq(courseId),eq(lessonId),eq(OTP), eq(request));
     }
-    
+
+    @Test
+    void testTrackLessonAttendances()
+    {
+        List <String> ans = new ArrayList<String>();
+
+        when(lessonService.lessonAttendance(eq(1), eq(request))).thenReturn(ans);
+
+        ResponseEntity <?> response = lessonController.trackLessonAttendances(1, request);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(ans, response.getBody());
+        verify(lessonService, times(1)).lessonAttendance(eq(1), eq(request));
+    }
 }

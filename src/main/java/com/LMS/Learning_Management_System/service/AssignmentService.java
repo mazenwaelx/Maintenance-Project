@@ -207,8 +207,7 @@ public class AssignmentService {
             for (Submission submission : assignmentSubmissions)
             {
                 Student student = submission.getStudentId();
-                String studentName = student.getFirstName() + ' ' + student.getLastName();
-                String studentSubmission = studentName + ": " + submission.getFilePath();
+                String studentSubmission = student.getUserAccountId() + ": " + submission.getFilePath();
                 submissions.add(studentSubmission);
             }
             return submissions;
