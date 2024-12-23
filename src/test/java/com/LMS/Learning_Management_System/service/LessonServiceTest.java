@@ -3,7 +3,7 @@ package com.LMS.Learning_Management_System.service;
 import com.LMS.Learning_Management_System.dto.CourseDto;
 import com.LMS.Learning_Management_System.dto.LessonDto;
 import com.LMS.Learning_Management_System.entity.*;
-import com.LMS.Learning_Management_System.repository.CourseRepository;
+import com.LMS.Learning_Management_System.repository.*;
 import com.LMS.Learning_Management_System.repository.EnrollmentRepository;
 import com.LMS.Learning_Management_System.repository.LessonAttendanceRepository;
 import com.LMS.Learning_Management_System.repository.LessonRepository;
@@ -30,6 +30,9 @@ class LessonServiceTest {
     @Mock
     private HttpServletRequest request;
 
+    @Mock
+    private StudentRepository studentRepository;
+
     @InjectMocks
     private LessonService lessonService;
 
@@ -43,12 +46,15 @@ class LessonServiceTest {
     private LessonAttendanceRepository lessonAttendanceRepository;
 
     private Users instructorUser;
+    private Users studentUser;
     private Lesson lesson;
     private Course course;
     private UsersType instructorType;
+    private UsersType studentType;
     private List<Lesson> lessons;
     private List<Enrollment> enrollments;
-    private List<LessonAttendance> lessonAttendances;
+    private LessonAttendance lessonAttendance;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -56,9 +62,16 @@ class LessonServiceTest {
         instructorType = new UsersType();
         instructorType.setUserTypeId(3);
 
+        studentType = new UsersType();
+        studentType.setUserTypeId(2);
+
         instructorUser = new Users();
         instructorUser.setUserId(1);
         instructorUser.setUserTypeId(instructorType);
+
+        studentUser = new Users();
+        studentUser.setUserId(2);
+        studentUser.setUserTypeId(studentType);
 
         course = new Course();
         course.setCourseId(1);
@@ -76,21 +89,19 @@ class LessonServiceTest {
         lessons = new ArrayList<>();
         lessons.add(lesson);
 
+        Student student = new Student();
+        student.setUserAccountId(2);
+        student.setUserId(studentUser);
+
         Enrollment enrollment = new Enrollment();
-        enrollment.setStudent(new Student());
-        enrollment.getStudent().setUserAccountId(1);
-        enrollment.getStudent().setFirstName("Rawan");
-        enrollment.getStudent().setLastName("Ahmed");
+        enrollment.setStudent(student);
         enrollment.setCourse(course);
         enrollments = new ArrayList<>();
         enrollments.add(enrollment);
 
-
-        LessonAttendance lessonAttendance = new LessonAttendance();
+        lessonAttendance = new LessonAttendance();
         lessonAttendance.setLessonId(lesson);
-        lessonAttendance.setStudentId(enrollment.getStudent());
-        lessonAttendances = new ArrayList<>();
-        lessonAttendances.add(lessonAttendance);
+        lessonAttendance.setStudentId(student);
     }
 
     @Test
@@ -170,7 +181,7 @@ class LessonServiceTest {
         HttpSession mockSession = mock(HttpSession.class);
         when(request.getSession()).thenReturn(mockSession);
 
-        when(mockSession.getAttribute("user")).thenReturn(instructorUser);
+        when(mockSession.getAttribute("user")).thenReturn(studentUser);
 
         when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
         when(courseRepository.findById(1)).thenReturn(Optional.of(course));
@@ -182,31 +193,96 @@ class LessonServiceTest {
     }
 
     @Test
-    void testLessonAttendance_Success(){
+    void testLessonAttendance_noLoggedInUser()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(null);
+        when(lessonRepository.existsById(1)).thenReturn(true);
+        when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
+        when(lessonAttendanceRepository.findAllByLessonId(lesson)).thenReturn(List.of(lessonAttendance));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            lessonService.lessonAttendance(1, request);
+        });
+
+        assertEquals("No logged in user is found.", exception.getMessage());
+    }
+
+    @Test
+    void testLessonAttendance_notInstructor()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(studentUser);
+        when(lessonRepository.existsById(1)).thenReturn(true);
+        when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
+        when(lessonAttendanceRepository.findAllByLessonId(lesson)).thenReturn(List.of(lessonAttendance));
+
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            lessonService.lessonAttendance(1, request);
+        });
+
+        assertEquals("Logged-in user is not an instructor.", exception.getMessage());
+    }
+
+    @Test
+    void testLessonAttendance_notLessonInstructor()
+    {
+        Users inValidInstructorUser = new Users();
+        inValidInstructorUser.setUserId(3);
+        inValidInstructorUser.setUserTypeId(instructorType);
+
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(inValidInstructorUser);
+        when(lessonRepository.existsById(1)).thenReturn(true);
+        when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
+        when(lessonAttendanceRepository.findAllByLessonId(lesson)).thenReturn(List.of(lessonAttendance));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            lessonService.lessonAttendance(1, request);
+        });
+
+        assertEquals("Logged-in instructor does not have access for this lesson attendances.", exception.getMessage());
+    }
+
+    @Test
+    void testLessonAttendance_lessonNotFound()
+    {
         HttpSession mockSession = mock(HttpSession.class);
         when(request.getSession()).thenReturn(mockSession);
 
         when(mockSession.getAttribute("user")).thenReturn(instructorUser);
 
-        when(lessonRepository.existsById(1)).thenReturn(true);
-        when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
-        when(lessonAttendanceRepository.findAllByLessonId(lesson)).thenReturn(lessonAttendances);
-        List<String> attendances = lessonService.lessonAttendance(1, request);
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            lessonService.lessonAttendance(2, request);
+        });
 
-        assertNotNull(attendances);
-        assertEquals(1, attendances.size());
-        assertEquals("Rawan Ahmed", attendances.get(0));
+        assertEquals("Lesson with ID 2 not found.", exception.getMessage());
     }
 
+    @Test
+    void testLessonAttendance()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(instructorUser);
+        when(lessonRepository.existsById(1)).thenReturn(true);
+        when(lessonRepository.findById(1)).thenReturn(Optional.of(lesson));
+        when(lessonAttendanceRepository.findAllByLessonId(lesson)).thenReturn(List.of(lessonAttendance));
+
+        List <String> quizGrades = lessonService.lessonAttendance(1, request);
+
+        assertEquals(1, quizGrades.size());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

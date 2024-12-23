@@ -222,14 +222,13 @@ public class LessonService {
             for (LessonAttendance lessonAttendance : lessonAttendances)
             {
                 Student student = lessonAttendance.getStudentId();
-                String studentName = student.getFirstName() + ' ' + student.getLastName();
-                attendances.add(studentName);
+                attendances.add(Integer.toString(student.getUserAccountId()));
             }
             return attendances;
         }
         else
         {
-            throw new IllegalArgumentException("Assignment with ID " + lessonId + " not found.");
+            throw new IllegalArgumentException("Lesson with ID " + lessonId + " not found.");
         }
     }
 }

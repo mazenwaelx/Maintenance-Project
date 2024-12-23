@@ -563,4 +563,96 @@ public class AssignmentServiceTest {
 
     }
 
+    @Test
+    void testAssignmentSubmissions_noLoggedInUser()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(null);
+        when(assignmentRepository.existsById(1)).thenReturn(true);
+        when(assignmentRepository.findById(1)).thenReturn(Optional.of(assignment));
+        when(submissionRepository.findAllByAssignmentId(assignment)).thenReturn(List.of(submission));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            assignmentService.assignmentSubmissions(1, request);
+        });
+
+        assertEquals("No logged in user is found.", exception.getMessage());
+    }
+
+    @Test
+    void testAssignmentSubmissions_notInstructor()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(studentUser);
+        when(assignmentRepository.existsById(1)).thenReturn(true);
+        when(assignmentRepository.findById(1)).thenReturn(Optional.of(assignment));
+        when(submissionRepository.findAllByAssignmentId(assignment)).thenReturn(List.of(submission));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            assignmentService.assignmentSubmissions(1, request);
+        });
+
+        assertEquals("Logged-in user is not an instructor.", exception.getMessage());
+    }
+
+    @Test
+    void testAssignmentSubmissions_notAssignmentInstructor()
+    {
+        Users inValidInstructorUser = new Users();
+        inValidInstructorUser.setUserId(3);
+        inValidInstructorUser.setUserTypeId(instructorType);
+
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(inValidInstructorUser);
+        when(assignmentRepository.existsById(1)).thenReturn(true);
+        when(assignmentRepository.findById(1)).thenReturn(Optional.of(assignment));
+        when(submissionRepository.findAllByAssignmentId(assignment)).thenReturn(List.of(submission));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            assignmentService.assignmentSubmissions(1, request);
+        });
+
+        assertEquals("Logged-in instructor does not have access for this assignment submissions.", exception.getMessage());
+    }
+
+    @Test
+    void testAssignmentSubmissions_assignmentNotFound()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(instructorUser);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        {
+            assignmentService.assignmentSubmissions(2, request);
+        });
+
+        assertEquals("Assignment with ID 2 not found.", exception.getMessage());
+    }
+
+    @Test
+    void testAssignmentSubmissions()
+    {
+        HttpSession mockSession = mock(HttpSession.class);
+        when(request.getSession()).thenReturn(mockSession);
+
+        when(mockSession.getAttribute("user")).thenReturn(instructorUser);
+        when(assignmentRepository.existsById(1)).thenReturn(true);
+        when(assignmentRepository.findById(1)).thenReturn(Optional.of(assignment));
+        when(submissionRepository.findAllByAssignmentId(assignment)).thenReturn(List.of(submission));
+
+        List <String> quizGrades = assignmentService.assignmentSubmissions(1, request);
+
+        assertEquals(1, quizGrades.size());
+    }
 }
