@@ -46,15 +46,6 @@ public class QuizService {
 
 
     public int Create(Integer course_id , int type_id , HttpServletRequest request ) throws Exception {  // return type ? { list of questions or Quiz }
-        /*
-        * get the desired course and type of quiz
-        * generate 5 random questions based on the course ID
-        * store their answers
-        * create the quiz with its ID as title
-        * map the quiz id to the questions' quiz id
-        *
-        * CHECKING : number of generated questions >= 5 , the course and type exists
-        * */
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         Course course= courseRepository.findById(course_id)
                 .orElseThrow(() -> new EntityNotFoundException("Course not found"));
@@ -98,14 +89,15 @@ public class QuizService {
         {
             if(!instructor)
                 throw new IllegalArgumentException("You don't have permission to enter this quiz.");
-        } else if(loggedInUser.getUserTypeId().getUserTypeId()==2)
+        }
+        else if(loggedInUser.getUserTypeId().getUserTypeId()==2)
         {
             boolean enrolled = enrollmentRepository.existsByStudentAndCourse(studentRepository.findById(loggedInUser.getUserId())
                             .orElseThrow(() -> new IllegalArgumentException("No student found with this ID!"))
                     ,courseRepository.findById(course_id)
                             .orElseThrow(() -> new IllegalArgumentException("No Course found with the given ID: " + course_id)));
             if(!enrolled)
-                throw new IllegalArgumentException("You don't have permission to enter this course.");
+                throw new IllegalArgumentException("You are not enrolled this course.");
         }
         List<Quiz> quizIds = quizRepository.getQuizzesByCourseId(course_id);
         StringBuilder Ids= new StringBuilder();
@@ -118,7 +110,7 @@ public class QuizService {
                Ids.append("quiz with id: ").append(quizDto.getQuizId()).append(" has time left: ")
                        .append(((quizDto.getCreation_date().getTime()+(15* 60 * 1000)-new Date().getTime())/(60*1000))).append("\n");
         }
-        if (Ids.isEmpty()) return "No Current Quizzes"+quizIds.size();
+        if (Ids.isEmpty()) return "No Current Quizzes\n overall Quizzes: "+quizIds.size();
         return Ids.toString();
     }
 
@@ -188,11 +180,6 @@ public class QuizService {
         Optional<Question> optQuestion = questionRepository.findById(questionDto.getQuestion_id());
         if(optQuestion.isPresent()) throw new Exception("question already exists");
         Question question = new Question();
-        Question temp = new Question();  // check duplication
-        temp.setQuestionText(questionDto.getQuestion_text());
-        Example<Question> example = Example.of(temp);
-        if(!questionRepository.findAll(example).isEmpty())throw new Exception("Question with this description Already exists!");
-
         question.setQuestionText(questionDto.getQuestion_text());
         // Handle QuestionType
         QuestionType questionType = questionTypeRepository.findById(questionDto.getType())
@@ -217,8 +204,10 @@ public class QuizService {
                 .findQuestionsByCourseIdAndQuestionType(course_id.getCourseId(),questionType);  // get all questions with same type
         List<Question> emptyQuestions = questionRepository
                 .findEmptyQuestionsByCourseIdAndQuestionType(course_id.getCourseId(),questionType);
-        if(allQuestions.size()< 5 ) throw new Exception("No enough Questions to create quiz!\n");
-        if(emptyQuestions.size() < 5 ) throw new Exception("No enough unassigned questions to create new quiz! number: "+emptyQuestions.size()+" type "+questionType+"\n");
+        if(allQuestions.size()< 5 )
+            throw new Exception("No enough Questions to create quiz!\n");
+        if(emptyQuestions.size() < 5 )
+            throw new Exception("No enough unassigned questions to create new quiz! number: "+emptyQuestions.size()+" type "+questionType+"\n"); ///
         Random random = new Random();
         Set<Integer> selectedIndices = new HashSet<>();  // To track selected indices
         int count = 0;
@@ -268,7 +257,7 @@ public class QuizService {
 
 
     public void createQuestionBank(int course_id, List<QuestionDto> questions, HttpServletRequest request) throws Exception {
-        // Fetch the course
+
         Course course = courseRepository.findById(course_id)
                 .orElseThrow(() -> new EntityNotFoundException("No such Course"));
         Users loggedInUser = (Users) request.getSession().getAttribute("user");
@@ -287,20 +276,12 @@ public class QuizService {
             throw new Exception("You don't have access to this feature!");
         }
 
-        Question question1 = new Question();
-        question1.setCourseId(course);
-        Example<Question>example= Example.of(question1);
-        // Load existing questions
-        List<Question> questionBank = questionRepository.findAll(example);
-
-        // Process questions
         for (QuestionDto dto : questions) {
             Question question = questionRepository.findById(dto.getQuestion_id())
                     .orElse(new Question()); // Find or create a new question
 
             question.setQuestionText(dto.getQuestion_text());
             try {
-                // Convert List<String> to JSON string
                 String optionsAsString = objectMapper.writeValueAsString(dto.getOptions());
                 question.setOptions(optionsAsString);
             } catch (Exception e) {
@@ -309,12 +290,10 @@ public class QuizService {
             question.setCorrectAnswer(dto.getCorrect_answer());
             question.setCourseId(course);
 
-            // Handle QuestionType
             QuestionType questionType = questionTypeRepository.findById(dto.getType())
                     .orElseThrow(() -> new EntityNotFoundException("No such QuestionType"+dto.getType()));
             question.setQuestionType(questionType);
 
-            // Save or update the question
             questionRepository.save(question);
         }
     }
@@ -355,19 +334,6 @@ public class QuizService {
         return quizDto;
     }
 
-
-    public void saveQuestion(Question question)
-    {
-        Question q = new Question();
-        q.setQuestionId(question.getQuestionId());
-        q.setQuestionText(question.getQuestionText());
-        q.setCourseId(question.getCourseId());
-        q.setQuiz(question.getQuiz());
-        q.setQuestionType(question.getQuestionType());
-        q.setOptions(question.getOptions());
-        q.setCorrectAnswer(question.getCorrectAnswer());
-        questionRepository.save(q);
-    }
 
     // grade quiz
     public void gradeQuiz(GradingDto gradingDto, HttpServletRequest request) throws Exception {

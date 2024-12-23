@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 public interface GradingRepository extends JpaRepository<Grading, Integer> {
-    @Query("SELECT g.grade FROM Grading g WHERE g.quizId.quizId = :quizId AND g.student_id.userId.userId = :studentId")
+    @Query("SELECT COALESCE(g.grade, -1) FROM Grading g WHERE g.quizId.quizId = :quizId AND g.student_id.userId.userId = :studentId")
     int findGradeByQuizAndStudentID(@Param("quizId") int quizId, @Param("studentId") int studentId);
     @Query("SELECT COUNT(g)>0 "+
             "FROM Grading g " +
