@@ -6,6 +6,8 @@ import com.LMS.Learning_Management_System.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,52 +19,64 @@ public class AssignmentService {
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final InstructorRepository instructorRepository;
+    private final NotificationsRepository notificationsRepository;
 
     public AssignmentService(AssignmentRepository assignmentRepository, SubmissionRepository submissionRepository,
                              CourseRepository courseRepository, StudentRepository studentRepository,
-                             EnrollmentRepository enrollmentRepository) {
+                             EnrollmentRepository enrollmentRepository,InstructorRepository instructorRepository,NotificationsRepository notificationsRepository) {
         this.assignmentRepository = assignmentRepository;
         this.submissionRepository = submissionRepository;
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
+        this.instructorRepository = instructorRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.notificationsRepository = notificationsRepository;
     }
 
-    public void uploadAssignment(AssignmentDto assignment, HttpServletRequest request) {
-        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("You are not logged in");
+    public void uploadAssignment(AssignmentDto assignmentDto, HttpServletRequest request) {
+        Users user = (Users) request.getSession().getAttribute("user");
+
+        // Allow both instructors and students
+        if (user == null || (user.getUserType().getUserTypeId() != 3 && user.getUserType().getUserTypeId() != 2)) {
+            throw new IllegalArgumentException("Only instructors and students can upload assignments.");
         }
 
-        Course course = courseRepository.findById(assignment.getCourseId())
-                .orElseThrow(()-> new IllegalArgumentException("Course not found"));
+        Course course = courseRepository.findById(assignmentDto.getCourseId())
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        Student student = studentRepository.findById(loggedInInstructor.getUserId())
-                .orElseThrow(()-> new IllegalArgumentException("You're not a student"));
+        Assignment assignment = new Assignment();
+        assignment.setTitle(assignmentDto.getTitle());
+        assignment.setDescription(assignmentDto.getDescription());
 
-        Boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, course);
-        if (!isExist) {
-            throw new IllegalArgumentException("You're not enrolled in this course");
-        }
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        LocalDateTime dueDate = LocalDateTime.parse(assignmentDto.getDueDate(), formatter);
+        assignment.setDueDate(dueDate);
+        assignment.setCourse(course);
 
+        Instructor instructor = instructorRepository.findById(assignmentDto.getInstructorId())
+                .orElseThrow(() -> new IllegalArgumentException("Instructor not found"));
+        assignment.setInstructor(instructor);
 
-        List<Submission> submissions = submissionRepository.findByStudentId(student);
+        assignmentRepository.save(assignment);
 
-        for (Submission s : submissions) {
-            if (s.getAssignmentId().getAssignmentId() == assignment.getAssignmentId()){
-                throw new IllegalArgumentException("You've already submitted this assignment");
+        // If student uploaded the assignment, auto-create submission
+        if (user.getUserType().getUserTypeId() == 2) {
+            Student student = studentRepository.findByUserAccountId(user.getUserId());
+            if (student == null) {
+                throw new IllegalArgumentException("Student record not found.");
             }
-        }
-        Assignment assignment1 = new Assignment();
-        assignment1.setAssignmentId(assignment.getAssignmentId());
-        assignment1.setDescription(assignment.getAssignmentDescription());
-        assignment1.setCourseID(course);
-        assignment1.setTitle(assignment.getAssignmentTitle());
 
-        Submission submission = new Submission();
-        submission.setAssignmentId(assignment1);
-        submission.setStudentId(student);
-        submissionRepository.save(submission);
+            Submission submission = new Submission();
+            submission.setAssignmentId(assignment);
+            submission.setStudent(student);
+            submission.setContent("Auto-submitted by student during upload.");
+            submission.setSubmittedAt(new java.util.Date());
+            submission.setGrade(null);
+            submission.setFeedback(null);
+
+            submissionRepository.save(submission);
+        }
     }
 
 
@@ -76,7 +90,7 @@ public class AssignmentService {
                 .orElseThrow(()-> new IllegalArgumentException("Assignment not found"));
 
 
-        if (loggedInInstructor.getUserId() != assignment.getCourseID().getInstructorId().getUserAccountId()){
+        if (loggedInInstructor.getUserId() != assignment.getCourse().getInstructorId().getUserAccountId()){
             throw new IllegalArgumentException("You're not the instructor of this course");
         }
 
@@ -84,7 +98,7 @@ public class AssignmentService {
         Student student = studentRepository.findById(studentID)
                 .orElseThrow(()-> new IllegalArgumentException("Student not found"));
 
-        List<Submission> submission = submissionRepository.findByStudentId(student);
+        List<Submission> submission = submissionRepository.findByStudent(student);
 
 
         if (submission.isEmpty()) {
@@ -108,33 +122,38 @@ public class AssignmentService {
             throw new IllegalArgumentException("You are not logged in");
         }
 
-
         Assignment assignment = assignmentRepository.findById(assigID)
-                .orElseThrow(()-> new IllegalArgumentException("Assignment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
 
-
-        if (loggedInInstructor.getUserId() != assignment.getCourseID().getInstructorId().getUserAccountId()){
+        if (loggedInInstructor.getUserId() != assignment.getCourse().getInstructorId().getUserAccountId()) {
             throw new IllegalArgumentException("You're not the instructor of this course");
         }
 
-
         Student student = studentRepository.findById(studentID)
-                .orElseThrow(()-> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
-        List<Submission> submission = submissionRepository.findByStudentId(student);
-
-
-        if (submission.isEmpty()) {
+        List<Submission> submissionList = submissionRepository.findByStudent(student);
+        if (submissionList.isEmpty()) {
             throw new IllegalArgumentException("Student has no submissions");
         }
 
-        for (Submission s : submission) {
+        for (Submission s : submissionList) {
             if (s.getAssignmentId().getAssignmentId() == assignment.getAssignmentId()) {
                 s.setFeedback(feedback);
                 submissionRepository.save(s);
+
+                // === Create a notification for the student ===
+                Notifications notification = new Notifications();
+                notification.setUser(student.getUserAccount()); // assumes Student → Users relation
+                notification.setMessage("Feedback added for assignment: " + assignment.getTitle());
+                notification.setCreatedAt(new java.util.Date());
+                notification.setRead(false);
+
+                notificationsRepository.save(notification);
                 return;
             }
         }
+
         throw new IllegalArgumentException("Student didn't submit this assignment");
     }
 
@@ -150,12 +169,12 @@ public class AssignmentService {
         Student student = studentRepository.findById(loggedInInstructor.getUserId())
                 .orElseThrow(()-> new IllegalArgumentException("You're not a student"));
 
-        Boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, assignment.getCourseID());
+        Boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, assignment.getCourse());
         if (!isExist) {
             throw new IllegalArgumentException("You're not enrolled in this course");
         }
 
-        List<Submission> submission = submissionRepository.findByStudentId(student);
+        List<Submission> submission = submissionRepository.findByStudent(student);
 
 
         if (submission.isEmpty()) {
@@ -188,7 +207,7 @@ public class AssignmentService {
             Assignment assignment = assignmentRepository.findById(assignmentId).get();
             List <Submission> assignmentSubmissions = submissionRepository.findAllByAssignmentId(assignment);
             Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-            int instructorId = assignment.getCourseID().getInstructorId().getUserAccountId();
+            int instructorId = assignment.getCourse().getInstructorId().getUserAccountId();
 
             if (loggedInInstructor == null)
             {
@@ -206,8 +225,8 @@ public class AssignmentService {
             List <String> submissions = new ArrayList<>();
             for (Submission submission : assignmentSubmissions)
             {
-                Student student = submission.getStudentId();
-                String studentSubmission = student.getUserAccountId() + ": " + submission.getFilePath();
+                Student student = submission.getStudent();
+                String studentSubmission = student.getUserAccountId() + ": " + submission.getContent();
                 submissions.add(studentSubmission);
             }
             return submissions;

@@ -46,6 +46,13 @@ public class Users {
         this.userType = userType;
     }
 
+    public UsersType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UsersType userType) {
+        this.userType = userType;
+    }
     public int getUserId() {
         return userId;
     }

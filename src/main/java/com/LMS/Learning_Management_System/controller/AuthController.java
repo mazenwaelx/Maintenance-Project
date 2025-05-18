@@ -25,9 +25,16 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody UserSignUpRequest signUpRequest ,HttpServletRequest request) {
+    public ResponseEntity<String> signUp(@RequestBody UserSignUpRequest signUpRequest, HttpServletRequest request) {
+        Users loggedInUser = (Users) request.getSession().getAttribute("user");
+
+        // Check if the logged-in user is an admin
+        if (loggedInUser == null || loggedInUser.getUserTypeId().getUserTypeId() != 1) {  // assuming 1 is Admin
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Admin only can create account");
+        }
+
         try {
-            usersService.save(signUpRequest , request);
+            usersService.save(signUpRequest, request);
             return ResponseEntity.ok("User registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -35,6 +42,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<String> login(HttpServletRequest request, @RequestParam String email, @RequestParam String password) {

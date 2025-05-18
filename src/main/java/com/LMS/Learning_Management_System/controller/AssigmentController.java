@@ -4,9 +4,11 @@ import com.LMS.Learning_Management_System.dto.AssignmentDto;
 import com.LMS.Learning_Management_System.entity.Assignment;
 import com.LMS.Learning_Management_System.entity.Student;
 import com.LMS.Learning_Management_System.entity.Submission;
+import com.LMS.Learning_Management_System.entity.Users;
 import com.LMS.Learning_Management_System.service.AssignmentService;
 import com.LMS.Learning_Management_System.service.NotificationsService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,13 @@ public class AssigmentController {
 
     @PostMapping("/uploadAssignment")
     public ResponseEntity<String> uploadAssignment(@RequestBody AssignmentDto assignment, HttpServletRequest request){
+        Users user = (Users) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User must be logged in to upload an assignment.");
+        }
+
+
         try {
             assignmentService.uploadAssignment(assignment, request);
             return ResponseEntity.ok("Assignment uploaded successfully.");

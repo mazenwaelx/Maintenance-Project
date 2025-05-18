@@ -22,16 +22,16 @@ public class CourseController {
         this.courseService = courseService;
     }
     @PostMapping("/add_course")
-    public ResponseEntity<String> addCourse(@RequestBody Course course ,HttpServletRequest request)
-
-    {
+    public ResponseEntity<String> addCourse(@RequestBody Course course, HttpServletRequest request) {
         try {
-            courseService.addCourse(course , request , course.getInstructorId().getUserAccountId());
+            // Now only pass the course and request — no instructorId parameter
+            courseService.addCourse(course, request);
             return ResponseEntity.ok("Course created successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/course_id/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable int id, HttpServletRequest request) {
         try {

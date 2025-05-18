@@ -1,7 +1,9 @@
 package com.LMS.Learning_Management_System.controller;
 
 
+import com.LMS.Learning_Management_System.entity.Notifications;
 import com.LMS.Learning_Management_System.entity.Student;
+import com.LMS.Learning_Management_System.repository.NotificationsRepository;
 import com.LMS.Learning_Management_System.service.NotificationsService;
 import com.LMS.Learning_Management_System.service.StudentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +18,11 @@ import java.util.List;
 public class StudentController {
     private final StudentService studentService;
     private final NotificationsService notificationsService;
-    public StudentController(StudentService studentService, NotificationsService notificationsService) {
+    private final NotificationsRepository notificationsRepository;
+    public StudentController(StudentService studentService, NotificationsService notificationsService, NotificationsRepository notificationsRepository) {
         this.studentService = studentService;
         this.notificationsService = notificationsService;
+        this.notificationsRepository = notificationsRepository;
     }
     @PutMapping("/update_profile/{studentId}")
     public ResponseEntity<String> updateUser(@PathVariable int studentId,
@@ -33,10 +37,12 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/allnotifications/{userId}")
-    public List<String> getAllNotifications(@PathVariable int userId) {
-        return notificationsService.getAllNotifications(userId);
+    @GetMapping("/allnotifications/{studentId}")
+    public List<Notifications> getAllNotifications(@PathVariable int studentId) {
+        return notificationsRepository.findByUser_UserId(studentId);
     }
+
+
 
     @GetMapping("/unreadnotifications/{userId}")
     public List<String> getUnreadNotifications(@PathVariable int userId) {

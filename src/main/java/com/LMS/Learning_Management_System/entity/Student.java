@@ -27,6 +27,13 @@ public class Student {
         this.firstName = firstName;
         this.lastName = lastName;
     }
+    @OneToOne
+    @JoinColumn(name = "user_account_id")
+    private Users userAccount;
+
+    public Users getUserAccount() {
+        return userAccount;
+    }
 
     public Student(Users savedUser) {
         this.userId = savedUser;

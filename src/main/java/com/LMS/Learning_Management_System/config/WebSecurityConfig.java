@@ -15,22 +15,26 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**", "/api/student/**" , "/api/instructor/**").permitAll()
+                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/enrollment/**").permitAll()
+                        .requestMatchers("/api/instructor/**").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
                         .requestMatchers("/api/lesson/**").permitAll()
                         .requestMatchers("/api/quiz/**").permitAll()
                         .requestMatchers("/api/assignment/**").permitAll()
+                        .requestMatchers("/api/enrollment/**").permitAll()
+                        .requestMatchers("/api/student/**").permitAll()
+
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                .cors(cors -> cors.disable())
-                .csrf().disable()
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
-                        .clearAuthentication(true)
                         .invalidateHttpSession(true)
+                        .clearAuthentication(true)
                 );
 
         return http.build();

@@ -16,8 +16,9 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enroll")
-    public ResponseEntity<String> enrollInCourse(@RequestBody Enrollment enrollment , HttpServletRequest request) {
+    public ResponseEntity<String> enrollInCourse(@RequestBody Enrollment enrollment, HttpServletRequest request) {
         try {
+            // Just pass the full object and request
             enrollmentService.enrollInCourse(enrollment, request);
             return ResponseEntity.ok("Student enrolled successfully!");
         } catch (IllegalArgumentException e) {

@@ -14,6 +14,7 @@ public class UsersType implements GrantedAuthority {
     @Column(name = "user_type_id")
     private int userTypeId;
 
+
     @Column(nullable = false, unique = true)
     private String userTypeName;
 
@@ -66,4 +67,6 @@ public class UsersType implements GrantedAuthority {
     public String getAuthority() {
         return "ROLE_" + userTypeName.toUpperCase();
     }
+
+
 }

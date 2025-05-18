@@ -1,11 +1,15 @@
 package com.LMS.Learning_Management_System.dto;
 
 public class AssignmentDto {
-    private int assignmentId;
-    private String assignmentTitle;
-    private String assignmentDescription;
-    private int courseId;
 
+    private int assignmentId;
+    private String title;
+    private String description;
+    private String dueDate;
+    private int courseId;
+    private int instructorId;
+
+    // Getters and Setters
     public int getAssignmentId() {
         return assignmentId;
     }
@@ -14,20 +18,28 @@ public class AssignmentDto {
         this.assignmentId = assignmentId;
     }
 
-    public String getAssignmentTitle() {
-        return assignmentTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setAssignmentTitle(String assignmentTitle) {
-        this.assignmentTitle = assignmentTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getAssignmentDescription() {
-        return assignmentDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAssignmentDescription(String assignmentDescription) {
-        this.assignmentDescription = assignmentDescription;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
     }
 
     public int getCourseId() {
@@ -38,6 +50,11 @@ public class AssignmentDto {
         this.courseId = courseId;
     }
 
+    public int getInstructorId() {
+        return instructorId;
+    }
+
+    public void setInstructorId(int instructorId) {
+        this.instructorId = instructorId;
+    }
 }
-
-

@@ -1,39 +1,48 @@
 package com.LMS.Learning_Management_System.entity;
 
-
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "assignment")
 public class Assignment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "assignment_id")
     private int assignmentId;
+
     private String title;
+
     private String description;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "course_id", referencedColumnName = "course_id")
-    private Course courseID;
-
     @Column(name = "due_date")
-    @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date dueDate;
+    private LocalDateTime dueDate;
 
-    public Assignment(int assignmentId, String title, String description, Course courseID, Date dueDate) {
+    @ManyToOne
+    @JoinColumn(name = "instructor_id")
+    private Instructor instructor;
+
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    // Constructors
+    public Assignment() {}
+
+    public Assignment(int assignmentId, String title, String description, Course course, LocalDateTime dueDate) {
         this.assignmentId = assignmentId;
         this.title = title;
         this.description = description;
-        this.courseID = courseID;
+        this.course = course;
         this.dueDate = dueDate;
     }
-    public Assignment() {}
 
+    // Getters and setters
     public int getAssignmentId() {
         return assignmentId;
     }
@@ -58,20 +67,28 @@ public class Assignment {
         this.description = description;
     }
 
-    public Course getCourseID() {
-        return courseID;
-    }
-
-    public void setCourseID(Course courseID) {
-        this.courseID = courseID;
-    }
-
-    public Date getDueDate() {
+    public LocalDateTime getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public Instructor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 
     @Override
@@ -80,8 +97,9 @@ public class Assignment {
                 "assignmentId=" + assignmentId +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", courseID=" + courseID +
                 ", dueDate=" + dueDate +
+                ", instructor=" + instructor +
+                ", course=" + course +
                 '}';
     }
 }

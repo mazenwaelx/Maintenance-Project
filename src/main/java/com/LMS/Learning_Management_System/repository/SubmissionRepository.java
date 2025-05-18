@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, Integer> {
-    List<Submission> findByStudentId(Student student);
+    List<Submission> findByStudent(Student student);
     List <Submission> findAllByAssignmentId (Assignment assignmentId);
 }

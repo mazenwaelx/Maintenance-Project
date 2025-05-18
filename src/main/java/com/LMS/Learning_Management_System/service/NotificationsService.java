@@ -29,7 +29,7 @@ public class NotificationsService {
         List<String> notificationsMessage = new ArrayList<>();
 
         for (Notifications notification : notificationsList) {
-            if (notification.getUserId().getUserId() == userId) {
+            if (notification.getUser().getUserId() == userId) {
                 notification.setRead(true);
                 notificationsMessage.add(notification.getMessage());
                 notificationsRepository.save(notification);
@@ -45,7 +45,7 @@ public class NotificationsService {
         List<String> notificationsMessage = new ArrayList<>();
 
         for (Notifications notification : notificationsList) {
-            if (notification.getUserId().getUserId() == userId && !notification.isRead()) {
+            if (notification.getUser().getUserId() == userId && !notification.isRead()) {
                 notification.setRead(true);
                 notificationsMessage.add(notification.getMessage());
                 notificationsRepository.save(notification);
@@ -58,9 +58,9 @@ public class NotificationsService {
     public void sendNotification(String message, int id) {
         Users user = usersRepository.findById(id).get();
         Notifications enrollmentNotification = new Notifications();
-        enrollmentNotification.setUserId(user);
+        enrollmentNotification.setUser(user);
         enrollmentNotification.setRead(false);
-        enrollmentNotification.setCreatedTime(new Date());
+        enrollmentNotification.setCreatedAt(new Date());
         enrollmentNotification.setMessage(message);
         notificationsRepository.save(enrollmentNotification);
 

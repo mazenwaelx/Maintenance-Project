@@ -12,19 +12,26 @@ public class Submission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "submission_id")
-
     private int submissionId;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "assignment_id", referencedColumnName = "assignment_id")
     private Assignment assignmentId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "student_id", referencedColumnName = "user_account_id")
-    private Student studentId;
+    private Student student; // ✅ Keep this
 
-    @Column(name = "file_path")
-    private String filePath;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 
     private Float grade;
 
@@ -37,11 +44,11 @@ public class Submission {
 
     public Submission() {}
 
-    public Submission(int submissionId, Assignment assignmentId, Student studentId, String filePath, Float grade, String feedback, Date submittedAt) {
+    public Submission(int submissionId, Assignment assignmentId, Student student, String content, Float grade, String feedback, Date submittedAt) {
         this.submissionId = submissionId;
         this.assignmentId = assignmentId;
-        this.studentId = studentId;
-        this.filePath = filePath;
+        this.student = student;
+        this.content = content;
         this.grade = grade;
         this.feedback = feedback;
         this.submittedAt = submittedAt;
@@ -63,21 +70,15 @@ public class Submission {
         this.assignmentId = assignmentId;
     }
 
-    public Student getStudentId() {
-        return studentId;
+    public Student getStudent() {
+        return student;
     }
 
-    public void setStudentId(Student studentId) {
-        this.studentId = studentId;
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
-    public String getFilePath() {
-        return filePath;
-    }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
 
     public Float getGrade() {
         return grade;
@@ -108,8 +109,8 @@ public class Submission {
         return "Submission{" +
                 "submissionId=" + submissionId +
                 ", assignmentId=" + assignmentId +
-                ", studentId=" + studentId +
-                ", filePath='" + filePath + '\'' +
+                ", student=" + student +
+                ", filePath='" + content + '\'' +
                 ", grade=" + grade +
                 ", feedback='" + feedback + '\'' +
                 ", submittedAt=" + submittedAt +

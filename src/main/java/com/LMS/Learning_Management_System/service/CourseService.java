@@ -28,32 +28,35 @@ public class CourseService {
         this.enrollmentService = enrollmentService;
         this.notificationsService = notificationsService;
     }
-    public void addCourse(Course course , HttpServletRequest request , int instructorId){
-        // auth
+    public void addCourse(Course course, HttpServletRequest request) {
+        // Authenticate and authorize
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (loggedInInstructor == null) {
             throw new IllegalArgumentException("No user is logged in.");
         }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
+        if (loggedInInstructor.getUserTypeId() == null
+                || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
             throw new IllegalArgumentException("Logged-in user is not an instructor.");
         }
-        if(instructorId != loggedInInstructor.getUserId()){
-            throw new IllegalArgumentException("Logged-in user is an another instructor.");
-        }
-        //
 
+        // Prevent duplicate course names
         if (courseRepository.findByCourseName(course.getCourseName()) != null) {
-            throw new IllegalArgumentException("This CourseName already exist");
+            throw new IllegalArgumentException("This course name already exists.");
         }
+
+        // Set creation timestamp
         course.setCreationDate(new Date(System.currentTimeMillis()));
-        if (course.getInstructorId() == null|| course.getInstructorId().getUserAccountId()==0) {
-            throw new IllegalArgumentException("InstructorId cannot be null");
-        }
-        Instructor instructor = instructorRepository.findById(course.getInstructorId().getUserAccountId())
+
+        // Always assign the course to the logged-in instructor
+        int instructorAccountId = loggedInInstructor.getUserId();
+        Instructor instructor = instructorRepository.findById(instructorAccountId)
                 .orElseThrow(() -> new IllegalArgumentException("No such Instructor"));
         course.setInstructorId(instructor);
+
+        // Persist
         courseRepository.save(course);
     }
+
     public List<CourseDto> getAllCourses(HttpServletRequest request) {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (loggedInInstructor == null) {

@@ -12,11 +12,13 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private int courseId;
+    private Integer  courseId;
 
     private String courseName;
-
-    // when delete course didnot delete instructor
+    private int capacity;
+    @Transient // Not persisted, calculate dynamically
+    private int currentEnrollment;
+    // when delete course did not delete instructor
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "instructor_id", referencedColumnName = "user_account_id")
     private Instructor instructorId;
@@ -34,11 +36,20 @@ public class Course {
 
     @OneToMany(mappedBy = "courseId")
     private List<Lesson> lessons;
-    public Course() {
 
+    // New field for prerequisites
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "course_prerequisites",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "prerequisite_id")
+    )
+    private List<Course> prerequisites;
+
+    public Course() {
     }
 
-    public Course(int courseId, String courseName, Instructor instructorId, String description, String media, int duration, Date creationDate) {
+    public Course(int courseId, String courseName, Instructor instructorId, String description, String media, int duration, Date creationDate, List<Course> prerequisites) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.instructorId = instructorId;
@@ -47,12 +58,27 @@ public class Course {
         this.duration = duration;
         this.creationDate = creationDate;
         this.lessons = lessons;
+        this.prerequisites = prerequisites;
     }
 
     public int getCourseId() {
         return courseId;
     }
+    public int getCapacity() {
+        return capacity;
+    }
 
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public int getCurrentEnrollment() {
+        return currentEnrollment;
+    }
+
+    public void setCurrentEnrollment(int currentEnrollment) {
+        this.currentEnrollment = currentEnrollment;
+    }
     public void setCourseId(int courseId) {
         this.courseId = courseId;
     }
@@ -113,6 +139,14 @@ public class Course {
         this.lessons = lessons;
     }
 
+    public List<Course> getPrerequisites() {
+        return prerequisites;
+    }
+
+    public void setPrerequisites(List<Course> prerequisites) {
+        this.prerequisites = prerequisites;
+    }
+
     @Override
     public String toString() {
         return "Course{" +
@@ -123,6 +157,7 @@ public class Course {
                 ", media='" + media + '\'' +
                 ", duration=" + duration +
                 ", creationDate=" + creationDate +
+                ", prerequisites=" + prerequisites +
                 '}';
     }
 }
